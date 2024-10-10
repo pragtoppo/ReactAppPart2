@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table from './Table';
 import Form from './Form';
+import axios from 'axios';
 
 function MyApp() {
    const [characters, setCharacters] = useState([]);
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState(null);
 
    function removeOneCharacter(index) {
       const updated = characters.filter((character, i) => i !== index);
@@ -14,10 +17,43 @@ function MyApp() {
       setCharacters([...characters, person]);
    }
 
+   // Function to fetch all users from the backend
+   async function fetchAll() {
+      try {
+         const response = await axios.get('http://localhost:5000/users');
+         return response.data.users_list;     
+      } catch (error) {
+         console.log(error); 
+         setError('Failed to fetch users.');
+         return false;         
+      }
+   }
+
+   // useEffect to call fetchAll on component mount
+   useEffect(() => {
+      const loadData = async () => {
+         const result = await fetchAll();
+         if (result) {
+            setCharacters(result);
+         }
+         setLoading(false);
+      };
+      loadData();
+   }, []);
+
+   // If loading, display a loading message
+   if (loading) {
+      return <div>Loading...</div>;
+   }
+
+   // If there is an error, display an error message
+   if (error) {
+      return <div>{error}</div>;
+   }
+
    return (
       <div className="container">
          <Table characterData={characters} removeCharacter={removeOneCharacter} />
-         {/* Add the Form component to allow adding new characters */}
          <Form handleSubmit={updateList} />
       </div>
    );
