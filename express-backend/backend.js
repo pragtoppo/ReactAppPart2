@@ -68,7 +68,7 @@ const findUserByNameAndJob = (name, job) => {
 app.post('/users', (req, res) => {
    const userToAdd = req.body;
    addUser(userToAdd);
-   res.status(200).end();
+   res.status(201).end();
 });
 
 function addUser(user) {
@@ -97,6 +97,19 @@ function deleteUserById(id) {
    }
    return false;
 }
+
+// Function to generate a random ID
+function generateId() {
+   return Math.random().toString(8).substring(2, 10); // Simple random ID generator
+}
+
+// Add new user
+app.post('/users', (req, res) => {
+   const userToAdd = { ...req.body, id: generateId() }; // Assign a new ID
+   users.users_list.push(userToAdd);
+   res.status(201).send(userToAdd); // Send back the created user
+});
+
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
