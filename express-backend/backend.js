@@ -64,16 +64,33 @@ const findUserByNameAndJob = (name, job) => {
    return users['users_list'].filter((user) => user.name === name && user.job === job);
 }
 
-// Add new user
+// Function to generate a random unique ID
+function generateId() {
+   return Math.random().toString(36).substr(2, 9); // Generates a random string ID
+}
+
+// Function to add a user to users_list
+function addUser(user) {
+   // Create a new object with the desired property order
+   const formattedUser = {
+       id: user.id || generateId(), // Use existing ID or generate a new one
+       name: user.name,
+       job: user.job
+   };
+
+   // Add the formatted user to the users_list
+   users['users_list'].push(formattedUser);
+
+   // Return the formatted user (optional if you need it)
+   return formattedUser;
+}
+
+// Modify the POST route to use the new addUser function
 app.post('/users', (req, res) => {
    const userToAdd = req.body;
-   addUser(userToAdd);
-   res.status(201).end();
+   const addedUser = addUser(userToAdd);
+   res.status(201).json(addedUser);
 });
-
-function addUser(user) {
-   users['users_list'].push(user);
-}
 
 // Delete a user by id
 app.delete('/users/:id', (req, res) => {
@@ -97,19 +114,6 @@ function deleteUserById(id) {
    }
    return false;
 }
-
-// Function to generate a random ID
-function generateId() {
-   return Math.random().toString(8).substring(2, 10); // Simple random ID generator
-}
-
-// Add new user
-app.post('/users', (req, res) => {
-   const userToAdd = { ...req.body, id: generateId() }; // Assign a new ID
-   users.users_list.push(userToAdd);
-   res.status(201).send(userToAdd); // Send back the created user
-});
-
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
